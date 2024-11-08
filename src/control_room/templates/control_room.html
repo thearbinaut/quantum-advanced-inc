@@ -21,6 +21,10 @@
         <button id="qftDemo">Run QFT Demo</button>
         <button id="groverDemo">Run Grover's Algorithm Demo</button>
         <button id="mlQuantumDemo">Run ML-Quantum Demo</button>
+        <button id="qmlDemo">Run Quantum Machine Learning Demo</button>
+        <button id="postQuantumCryptoDemo">Run Post-Quantum Cryptography Demo</button>
+        <button id="quantumPortfolioOptimization">Run Quantum Portfolio Optimization</button>
+        <button id="quantumBlockchainDemo">Run Quantum-Enhanced Blockchain Demo</button>
     </div>
     <div id="quantumResult"></div>
     <canvas id="resultChart" width="400" height="200"></canvas>
@@ -55,31 +59,33 @@
                 });
             }
 
-            $('#quantumDemo').click(function() {
-                $.get('/quantum_demo', function(data) {
-                    $('#quantumResult').html('<h3>Basic Quantum Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-                    updateChart(Object.keys(data), Object.values(data), 'Basic Quantum Demo');
+            // ... (keep existing demo button click handlers)
+
+            $('#qmlDemo').click(function() {
+                $.get('/qml_demo', function(data) {
+                    $('#quantumResult').html('<h3>Quantum Machine Learning Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Prediction ' + (i+1) for (i in data.predictions)], data.predictions, 'QML Predictions');
                 });
             });
 
-            $('#qftDemo').click(function() {
-                $.get('/qft_demo', function(data) {
-                    $('#quantumResult').html('<h3>QFT Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-                    updateChart(Object.keys(data), Object.values(data), 'QFT Demo');
+            $('#postQuantumCryptoDemo').click(function() {
+                $.get('/post_quantum_crypto_demo', function(data) {
+                    $('#quantumResult').html('<h3>Post-Quantum Cryptography Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Public Key', 'Ciphertext', 'Shared Secret'], [data.public_key_size, data.ciphertext_size, data.shared_secret_size], 'Key Sizes (bytes)');
                 });
             });
 
-            $('#groverDemo').click(function() {
-                $.get('/grover_demo', function(data) {
-                    $('#quantumResult').html('<h3>Grover\'s Algorithm Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-                    updateChart(['Most Likely', 'Other'], [data.probability, 1 - data.probability], 'Grover\'s Algorithm Demo');
+            $('#quantumPortfolioOptimization').click(function() {
+                $.get('/quantum_portfolio_optimization', function(data) {
+                    $('#quantumResult').html('<h3>Quantum Portfolio Optimization Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Asset ' + (i+1) for (i in data.optimal_allocation)], data.optimal_allocation, 'Optimal Portfolio Allocation');
                 });
             });
 
-            $('#mlQuantumDemo').click(function() {
-                $.get('/ml_quantum_demo', function(data) {
-                    $('#quantumResult').html('<h3>ML-Quantum Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
-                    updateChart(['Accuracy', 'Error'], [data.accuracy, 1 - data.accuracy], 'ML-Quantum Demo');
+            $('#quantumBlockchainDemo').click(function() {
+                $.get('/quantum_blockchain_demo', function(data) {
+                    $('#quantumResult').html('<h3>Quantum-Enhanced Blockchain Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Block ' + block.index for block in data], [Object.keys(block.quantum_state)[0] for block in data], 'Quantum States in Blockchain');
                 });
             });
         });
