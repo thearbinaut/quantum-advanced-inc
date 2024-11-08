@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Room - Quantum Advanced Inc.</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <h1>Welcome to the Control Room, {{ current_user.id }}</h1>
@@ -13,5 +14,16 @@
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
         </ul>
     </nav>
+    <button id="quantumDemo">Run Quantum Demo</button>
+    <div id="quantumResult"></div>
+    <script>
+        $(document).ready(function() {
+            $('#quantumDemo').click(function() {
+                $.get('/quantum_demo', function(data) {
+                    $('#quantumResult').text(JSON.stringify(data, null, 2));
+                });
+            });
+        });
+    </script>
 </body>
 </html>

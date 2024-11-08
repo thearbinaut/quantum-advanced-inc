@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
+from qiskit import QuantumCircuit, Aer, execute
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -40,6 +41,23 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/quantum_demo')
+@login_required
+def quantum_demo():
+    # Create a quantum circuit
+    circuit = QuantumCircuit(2, 2)
+    circuit.h(0)  # Apply Hadamard gate to qubit 0
+    circuit.cx(0, 1)  # Apply CNOT gate with control qubit 0 and target qubit 1
+    circuit.measure([0, 1], [0, 1])
+
+    # Execute the circuit on a simulator
+    backend = Aer.get_backend('qasm_simulator')
+    job = execute(circuit, backend, shots=1000)
+    result = job.result()
+    counts = result.get_counts(circuit)
+
+    return jsonify(counts)
 
 if __name__ == '__main__':
     app.run(debug=True)

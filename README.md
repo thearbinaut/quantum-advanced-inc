@@ -8,22 +8,37 @@ This repository contains the source code and documentation for Quantum Advanced 
 - `docs/`: Documentation files
 - `marketing/`: Marketing materials
 
-## Local Setup
+## Features
+
+- User authentication
+- Quantum computing demo using Qiskit
+- Containerized application using Docker
+- CI/CD pipeline using GitHub Actions
+- Serverless deployment configuration for AWS Lambda
+
+## Local Development
 
 1. Install dependencies: `pip install -r requirements.txt`
 2. Run the application: `python src/control_room/app.py`
 
-## Static Hosting
+## Docker Development
 
-The `index.html` file in the root directory provides a static version of the site, suitable for hosting on platforms like Netlify or Vercel.
+1. Build the Docker image: `docker build -t quantum-advanced-inc .`
+2. Run the container: `docker run -p 5000:5000 quantum-advanced-inc`
 
-## Deployment
+## Static Site Generation
 
-For full functionality, deploy this application to a platform that supports Python web applications, such as Heroku, DigitalOcean, or AWS.
+Run `python generate_static_site.py` to create a static version of the site in the `static_site` directory.
 
-1. Set up an account on your chosen platform
-2. Follow the platform's instructions for deploying a Python/Flask application
-3. Set the necessary environment variables (e.g., SECRET_KEY)
+## Deployment Options
+
+1. Heroku: Use the provided Procfile
+2. AWS Lambda: Use the serverless.yml configuration with Serverless Framework
+3. Any WSGI-compatible server: Use the wsgi.py file
+
+## CI/CD
+
+The GitHub Actions workflow in `.github/workflows/ci_cd.yml` handles continuous integration and deployment.
 
 ## Contact
 
