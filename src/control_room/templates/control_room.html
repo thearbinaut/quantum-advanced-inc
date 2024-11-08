@@ -6,6 +6,7 @@
     <title>Control Room - Quantum Advanced Inc.</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>Welcome to the Control Room, {{ current_user.id }}</h1>
@@ -14,13 +15,71 @@
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
         </ul>
     </nav>
-    <button id="quantumDemo">Run Quantum Demo</button>
+    <div class="quantum-demos">
+        <h2>Quantum Demos</h2>
+        <button id="quantumDemo">Run Basic Quantum Demo</button>
+        <button id="qftDemo">Run QFT Demo</button>
+        <button id="groverDemo">Run Grover's Algorithm Demo</button>
+        <button id="mlQuantumDemo">Run ML-Quantum Demo</button>
+    </div>
     <div id="quantumResult"></div>
+    <canvas id="resultChart" width="400" height="200"></canvas>
     <script>
         $(document).ready(function() {
+            let chart;
+
+            function updateChart(labels, data, title) {
+                if (chart) {
+                    chart.destroy();
+                }
+                const ctx = document.getElementById('resultChart').getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: title,
+                            data: data,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
             $('#quantumDemo').click(function() {
                 $.get('/quantum_demo', function(data) {
-                    $('#quantumResult').text(JSON.stringify(data, null, 2));
+                    $('#quantumResult').html('<h3>Basic Quantum Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(Object.keys(data), Object.values(data), 'Basic Quantum Demo');
+                });
+            });
+
+            $('#qftDemo').click(function() {
+                $.get('/qft_demo', function(data) {
+                    $('#quantumResult').html('<h3>QFT Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(Object.keys(data), Object.values(data), 'QFT Demo');
+                });
+            });
+
+            $('#groverDemo').click(function() {
+                $.get('/grover_demo', function(data) {
+                    $('#quantumResult').html('<h3>Grover\'s Algorithm Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Most Likely', 'Other'], [data.probability, 1 - data.probability], 'Grover\'s Algorithm Demo');
+                });
+            });
+
+            $('#mlQuantumDemo').click(function() {
+                $.get('/ml_quantum_demo', function(data) {
+                    $('#quantumResult').html('<h3>ML-Quantum Demo Results:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>');
+                    updateChart(['Accuracy', 'Error'], [data.accuracy, 1 - data.accuracy], 'ML-Quantum Demo');
                 });
             });
         });

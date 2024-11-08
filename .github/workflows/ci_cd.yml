@@ -21,9 +21,32 @@ jobs:
         pip install -r requirements.txt
     - name: Run tests
       run: python -m unittest discover tests
+    - name: Run security scan
+      run: |
+        pip install bandit
+        bandit -r . -f custom -o security_report.txt
+    - name: Upload security report
+      uses: actions/upload-artifact@v2
+      with:
+        name: security-report
+        path: security_report.txt
 
-  deploy:
+  build_and_push:
     needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Docker image
+      run: docker build -t quantum-advanced-inc .
+    - name: Log in to Docker Hub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    - name: Push image to Docker Hub
+      run: |
+        docker tag quantum-advanced-inc ${{ secrets.DOCKER_USERNAME }}/quantum-advanced-inc:${{ github.sha }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/quantum-advanced-inc:${{ github.sha }}
+
+  deploy_heroku:
+    needs: build_and_push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
@@ -32,4 +55,23 @@ jobs:
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        git push https://heroku:$HEROKU_API_KEY@git.heroku.com/quantum-advanced-inc.git main
+        heroku container:login
+        heroku container:push web -a quantum-advanced-inc
+        heroku container:release web -a quantum-advanced-inc
+
+  deploy_aws:
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Deploy to AWS Lambda
+      run: |
+        npm install -g serverless
+        serverless deploy

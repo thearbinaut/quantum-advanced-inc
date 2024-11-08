@@ -5,6 +5,18 @@ provider:
   runtime: python3.9
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
+  environment:
+    FLASK_ENV: production
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:service}-${self:provider.stage}"
 
 functions:
   app:
@@ -16,10 +28,27 @@ functions:
       - http:
           path: /{proxy+}
           method: ANY
+    environment:
+      DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
 
 plugins:
   - serverless-python-requirements
   - serverless-wsgi
+  - serverless-domain-manager
 
 custom:
   wsgi:
@@ -27,6 +56,11 @@ custom:
     packRequirements: false
   pythonRequirements:
     dockerizePip: non-linux
+  customDomain:
+    domainName: api.quantumadvancedinc.com
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
 
 package:
   exclude:
